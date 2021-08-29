@@ -120,10 +120,24 @@ export let lt = (x: Int32, y: Int32) => {
 }
 
 @disableGC
+export let ltU = (x: Int32, y: Int32) => {
+  let x = WasmI32.load(WasmI32.fromGrain(x), 8n)
+  let y = WasmI32.load(WasmI32.fromGrain(y), 8n)
+  WasmI32.ltU(x, y)
+}
+
+@disableGC
 export let gt = (x: Int32, y: Int32) => {
   let x = WasmI32.load(WasmI32.fromGrain(x), 8n)
   let y = WasmI32.load(WasmI32.fromGrain(y), 8n)
   WasmI32.gtS(x, y)
+}
+
+@disableGC
+export let gtU = (x: Int32, y: Int32) => {
+  let x = WasmI32.load(WasmI32.fromGrain(x), 8n)
+  let y = WasmI32.load(WasmI32.fromGrain(y), 8n)
+  WasmI32.gtU(x, y)
 }
 
 @disableGC
@@ -134,10 +148,24 @@ export let lte = (x: Int32, y: Int32) => {
 }
 
 @disableGC
+export let lteU = (x: Int32, y: Int32) => {
+  let x = WasmI32.load(WasmI32.fromGrain(x), 8n)
+  let y = WasmI32.load(WasmI32.fromGrain(y), 8n)
+  WasmI32.leU(x, y)
+}
+
+@disableGC
 export let gte = (x: Int32, y: Int32) => {
   let x = WasmI32.load(WasmI32.fromGrain(x), 8n)
   let y = WasmI32.load(WasmI32.fromGrain(y), 8n)
   WasmI32.geS(x, y)
+}
+
+@disableGC
+export let gteU = (x: Int32, y: Int32) => {
+  let x = WasmI32.load(WasmI32.fromGrain(x), 8n)
+  let y = WasmI32.load(WasmI32.fromGrain(y), 8n)
+  WasmI32.geU(x, y)
 }
 
 // Int32 bit/logical operations
