@@ -1531,12 +1531,17 @@ and print_expression =
           Doc.nil;
         };
 
-      let true_false_space = Doc.space;
-      // keep this - we need this if we don't force single lines into block expressions
-      // switch (trueExpr.pexp_desc) {
-      // | PExpBlock(expressions) => Doc.space
-      // | _ => Doc.line
-      // };
+      let force_expressions_to_blocks = false;
+
+      let true_false_space =
+        if (force_expressions_to_blocks) {
+          Doc.space;
+        } else {
+          switch (trueExpr.pexp_desc) {
+          | PExpBlock(expressions) => Doc.space
+          | _ => Doc.line
+          };
+        };
 
       let true_clause =
         switch (trueExpr.pexp_desc) {
@@ -1550,23 +1555,33 @@ and print_expression =
           )
 
         | _ =>
-          Doc.concat([
-            Doc.lbrace,
-            Doc.indent(
-              Doc.concat([
-                Doc.hardLine,
-                print_expression(
-                  ~parentIsArrow=false,
-                  ~endChar=None,
-                  ~original_source,
-                  ~parent_loc,
-                  trueExpr,
-                ),
-              ]),
-            ),
-            Doc.hardLine,
-            Doc.rbrace,
-          ])
+          if (force_expressions_to_blocks) {
+            Doc.concat([
+              Doc.lbrace,
+              Doc.indent(
+                Doc.concat([
+                  Doc.hardLine,
+                  print_expression(
+                    ~parentIsArrow=false,
+                    ~endChar=None,
+                    ~original_source,
+                    ~parent_loc,
+                    trueExpr,
+                  ),
+                ]),
+              ),
+              Doc.hardLine,
+              Doc.rbrace,
+            ]);
+          } else {
+            print_expression(
+              ~parentIsArrow=false,
+              ~endChar=None,
+              ~original_source,
+              ~parent_loc,
+              trueExpr,
+            );
+          }
         };
 
       let false_clause =
@@ -1600,30 +1615,49 @@ and print_expression =
             ),
           ])
         | _ =>
-          Doc.concat([
-            true_false_space,
-            Doc.text("else"),
-            Doc.group(
-              Doc.concat([
-                Doc.space,
-                Doc.lbrace,
-                Doc.indent(
-                  Doc.concat([
-                    Doc.hardLine,
-                    print_expression(
-                      ~parentIsArrow=false,
-                      ~endChar=None,
-                      ~original_source,
-                      ~parent_loc,
-                      falseExpr,
-                    ),
-                  ]),
-                ),
-                Doc.hardLine,
-                Doc.rbrace,
-              ]),
-            ),
-          ])
+          if (force_expressions_to_blocks) {
+            Doc.concat([
+              true_false_space,
+              Doc.text("else"),
+              Doc.group(
+                Doc.concat([
+                  Doc.space,
+                  Doc.lbrace,
+                  Doc.indent(
+                    Doc.concat([
+                      Doc.hardLine,
+                      print_expression(
+                        ~parentIsArrow=false,
+                        ~endChar=None,
+                        ~original_source,
+                        ~parent_loc,
+                        falseExpr,
+                      ),
+                    ]),
+                  ),
+                  Doc.hardLine,
+                  Doc.rbrace,
+                ]),
+              ),
+            ]);
+          } else {
+            Doc.concat([
+              true_false_space,
+              Doc.text("else"),
+              Doc.group(
+                Doc.concat([
+                  Doc.space,
+                  print_expression(
+                    ~parentIsArrow=false,
+                    ~endChar=None,
+                    ~original_source,
+                    ~parent_loc,
+                    falseExpr,
+                  ),
+                ]),
+              ),
+            ]);
+          }
         };
 
       if (parentIsArrow) {
@@ -2903,7 +2937,6 @@ let reformat_ast =
   //Doc.debug(final_doc);
   //
 
-  Doc.toString(~width=80, final_doc) |> print_endline;
   //use this to see the AST in JSON
   // print_endline(
   //   Yojson.Basic.pretty_to_string(
@@ -2912,4 +2945,38 @@ let reformat_ast =
   //     ),
   //   ),
   // );
+
+  Doc.toString(~width=80, final_doc); // |> print_endline;
+};
+
+let validate_reformat =
+    (
+      original: Parsetree.parsed_program,
+      reformatted: Parsetree.parsed_program,
+    ) => {
+  let orig_mode = Grain_utils.Config.sexp_locs_enabled^;
+  Grain_utils.Config.sexp_locs_enabled := false;
+
+  let original_s =
+    Sexplib.Sexp.to_string_hum(
+      Grain_parsing.Parsetree.sexp_of_parsed_program(original),
+    );
+
+  let formatted_s =
+    Sexplib.Sexp.to_string_hum(
+      Grain_parsing.Parsetree.sexp_of_parsed_program(reformatted),
+    );
+
+  // reset the mode just in case
+  Grain_utils.Config.sexp_locs_enabled := orig_mode;
+
+  print_endline(original_s);
+
+  print_endline(formatted_s);
+
+  if (original_s == formatted_s) {
+    true;
+  } else {
+    false;
+  };
 };
