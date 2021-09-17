@@ -388,5 +388,6 @@ type anf_program = {
 type anf_bind =
   | BSeq(comp_expression)
   | BLet(Ident.t, comp_expression)
+  | BLetMut(Ident.t, comp_expression)
   | BLetRec(list((Ident.t, comp_expression)))
-  | BLetExport(rec_flag, list((Ident.t, comp_expression)));
+  | BLetExport(rec_flag, mut_flag, list((Ident.t, comp_expression)));

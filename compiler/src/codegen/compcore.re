@@ -874,19 +874,77 @@ let compile_bind =
     };
   | MClosureBind(i) =>
     /* Closure bindings need to be calculated */
-    if (!(action == BindGet)) {
-      failwith(
-        "Internal error: attempted to emit instruction which would mutate closure contents",
-      );
-    };
-    appropriate_incref(
-      env,
-      load(
-        ~offset=4 * (4 + Int32.to_int(i)),
+    let offset = 4 * (4 + Int32.to_int(i));
+    switch (action) {
+    | BindGet =>
+      appropriate_incref(
+        env,
+        load(
+          ~offset,
+          wasm_mod,
+          Expression.Local_get.make(wasm_mod, 0, Type.int32),
+        ),
+      )
+    | BindSet(arg) =>
+      store(
+        ~offset,
         wasm_mod,
         Expression.Local_get.make(wasm_mod, 0, Type.int32),
-      ),
-    );
+        Expression.Tuple_extract.make(
+          wasm_mod,
+          Expression.Tuple_make.make(
+            wasm_mod,
+            [
+              arg,
+              appropriate_decref(
+                env,
+                load(
+                  ~offset,
+                  wasm_mod,
+                  Expression.Local_get.make(wasm_mod, 0, Type.int32),
+                ),
+              ),
+            ],
+          ),
+          0,
+        ),
+      )
+    | BindTee(arg) =>
+      Expression.Block.make(
+        wasm_mod,
+        gensym_label("BindTee"),
+        [
+          store(
+            ~offset,
+            wasm_mod,
+            Expression.Local_get.make(wasm_mod, 0, Type.int32),
+            Expression.Tuple_extract.make(
+              wasm_mod,
+              Expression.Tuple_make.make(
+                wasm_mod,
+                [
+                  arg,
+                  appropriate_decref(
+                    env,
+                    load(
+                      ~offset,
+                      wasm_mod,
+                      Expression.Local_get.make(wasm_mod, 0, Type.int32),
+                    ),
+                  ),
+                ],
+              ),
+              0,
+            ),
+          ),
+          load(
+            ~offset,
+            wasm_mod,
+            Expression.Local_get.make(wasm_mod, 0, Type.int32),
+          ),
+        ],
+      )
+    };
   | MImport(i) =>
     if (!(action == BindGet)) {
       failwith(

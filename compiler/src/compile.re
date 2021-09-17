@@ -59,7 +59,7 @@ let compile_prog = p =>
   Compcore.module_to_bytes @@ Compcore.compile_wasm_module(p);
 
 let log_state = state =>
-  if (Grain_utils.Config.verbose^) {
+  if (Grain_utils.Config.verbose^ && state.cstate_filename == Some("test2.gr")) {
     let prerr_sexp = (conv, x) =>
       prerr_string(Sexplib.Sexp.to_string_hum(conv(x)));
     switch (state.cstate_desc) {

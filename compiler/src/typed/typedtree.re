@@ -417,7 +417,7 @@ and expression_desc =
   | TExpPrim2(prim2, expression, expression)
   | TExpPrimN(primn, list(expression))
   | TExpBoxAssign(expression, expression)
-  | TExpAssign(expression, expression)
+  | TExpAssign(Path.t, expression)
   | TExpIf(expression, expression, expression)
   | TExpWhile(expression, expression)
   | TExpFor(

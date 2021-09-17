@@ -978,9 +978,9 @@ and type_expect_ =
     });
   | PExpAssign(sidexpr, sval) =>
     let idexpr = type_expect(env, sidexpr, mk_expected(newvar()));
-    let (id, {val_mutable}) =
+    let (path, id, {val_mutable}) =
       switch (idexpr.exp_desc) {
-      | TExpIdent(_, id, vd) => (id, vd)
+      | TExpIdent(path, id, vd) => (path, id, vd)
       | _ =>
         failwith("lhs of assign was not identifier; impossible by parsing")
       };
@@ -990,7 +990,7 @@ and type_expect_ =
     let val_ = type_expect(env, sval, mk_expected(newvar()));
     unify_exp(env, val_, idexpr.exp_type);
     rue({
-      exp_desc: TExpAssign(idexpr, val_),
+      exp_desc: TExpAssign(path, val_),
       exp_loc: loc,
       exp_extra: [],
       exp_attributes: attributes,

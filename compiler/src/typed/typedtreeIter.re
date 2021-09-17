@@ -207,9 +207,7 @@ module MakeIterator =
     | TExpBoxAssign(e1, e2) =>
       iter_expression(e1);
       iter_expression(e2);
-    | TExpAssign(e1, e2) =>
-      iter_expression(e1);
-      iter_expression(e2);
+    | TExpAssign(_, e2) => iter_expression(e2)
     | TExpMatch(value, branches, _) =>
       iter_expression(value);
       iter_match_branches(branches);

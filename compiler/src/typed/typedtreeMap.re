@@ -202,8 +202,7 @@ module MakeMap =
       | TExpPrimN(o, args) => TExpPrimN(o, List.map(map_expression, args))
       | TExpBoxAssign(e1, e2) =>
         TExpBoxAssign(map_expression(e1), map_expression(e2))
-      | TExpAssign(e1, e2) =>
-        TExpAssign(map_expression(e1), map_expression(e2))
+      | TExpAssign(e1, e2) => TExpAssign(e1, map_expression(e2))
       | TExpMatch(value, branches, p) =>
         TExpMatch(map_expression(value), map_match_branches(branches), p)
       | TExpTuple(args) => TExpTuple(List.map(map_expression, args))
