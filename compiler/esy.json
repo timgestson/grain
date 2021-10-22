@@ -22,7 +22,7 @@
     "copy:exe": "cp #{$GRAINC_BIN_PATH} #{$GRAINDOC_BIN_PATH} #{$GRAINFORMAT_BIN_PATH} #{$CLI_BIN_DIR}",
     "copy:js": "cp #{$GRAINC_JS_PATH} #{$GRAINDOC_JS_PATH} #{$GRAINFORMAT_JS_PATH} #{$CLI_BIN_DIR}",
     "clean": "rm -rf #{self.root}/_esy",
-    "test": "esy exec-command --build-context --include-build-env --include-current-env dune exec -- #{'test' / 'test.exe'}",
+    "test": "esy exec-command --build-context --include-build-env dune exec -- #{'test' / 'test.exe'}",
     "format": "dune build @fmt --auto-promote",
     "check-format": "dune build @fmt"
   },
